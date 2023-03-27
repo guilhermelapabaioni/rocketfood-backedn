@@ -28,7 +28,7 @@ class UsersController {
       await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, password, 'user'])
     }
 
-    return res.json('User created successfully.')
+    return res.json(`User created successfully`)
   }
 
   async update(req, res) {
