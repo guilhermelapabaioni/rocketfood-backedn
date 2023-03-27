@@ -1,10 +1,10 @@
 const sqliteConnection = require('../database/sqlite')
 const AppError = require('../utils/AppError')
-const { hash, compare } = require('bcryptjs')
+// const { hash, compare } = require('bcryptjs')
 
 class UsersController {
   async create(req, res) {
-    const { name, email, password, confirmPassword } = req.body
+    const { name, email, password, confirmPassword, role } = req.body
 
     const database = await sqliteConnection()
 
@@ -22,7 +22,11 @@ class UsersController {
       throw new AppError('As senhas não coincidem!')
     }
 
-    await database.run('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, password])
+    if (role) {
+      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, password, role])
+    } else {
+      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, password, 'user'])
+    }
 
     return res.json('User created successfully.')
   }
@@ -30,7 +34,6 @@ class UsersController {
   async update(req, res) {
     const { id } = req.params
     const { name, email, oldPassword, newPassword } = req.body
-    
 
     const database = await sqliteConnection()
     const user = await database.get('SELECT * FROM users WHERE id = (?)', [id])
