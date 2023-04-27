@@ -8,8 +8,10 @@ migrationsDatabase()
 // Criando a aplicação baseada em NodeJS express.
 const express = require('express');
 const routes = require('./routes')
+const cors = require('cors')
 const app = express();
 
+app.use(cors())
 app.use(express.json());
 app.use(routes)
 
@@ -21,6 +23,13 @@ app.use((error, req, res, next) => {
       message: error.message
     })
   }
+
+  console.log(error)
+
+  return res.status(500).json({
+    status: 'Error',
+    message: 'Internal Server Error'
+  })
 })
 
 // Informando em qual porta de rede a aplicação irá funcionar.

@@ -70,7 +70,18 @@ class UsersController {
 
   async index(req, res) { }
 
-  async get(req, res) { }
+  async get(req, res) { 
+    const {email, password} = req.body
+
+    const database = await sqliteConnection()
+    const user = await database.get('SELECT * FROM users WHERE email = (?)', [email])
+
+    if(password != user.password) {
+      throw new AppError('Something is wrong.')
+    }
+
+    return res.json(user)
+  }
 }
 
 module.exports = UsersController;
