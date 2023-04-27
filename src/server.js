@@ -1,6 +1,8 @@
 require('express-async-errors')
 const AppError = require('./utils/AppError')
 
+const uploadConfig = require('./config/upload')
+
 // Inicializando o banco de dados e criando as tabelas necessárias quando a aplicação for inicializada.
 const migrationsDatabase = require('./database/sqlite/migrations')
 migrationsDatabase()
@@ -14,6 +16,8 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 app.use(routes)
+
+app.use('/files', express.static(uploadConfig.UPLOADS_FOLDER))
 
 // Configurando a aplicação para utilizar uma classe chamada AppError cujo irá retornar os erros do NodeJS express.
 app.use((error, req, res, next) => {
