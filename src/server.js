@@ -1,7 +1,7 @@
 require('express-async-errors')
 const AppError = require('./utils/AppError')
-
 const uploadConfig = require('./config/upload')
+const path = require('path');
 
 // Inicializando o banco de dados e criando as tabelas necessárias quando a aplicação for inicializada.
 const migrationsDatabase = require('./database/sqlite/migrations')
@@ -35,6 +35,13 @@ app.use((error, req, res, next) => {
     message: 'Internal Server Error'
   })
 })
+
+app.get('/tmp/uploads/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const imagePath = path.join(__dirname, '../tmp/uploads', filename);
+  console.log(imagePath);
+  res.sendFile(imagePath);
+});
 
 // Informando em qual porta de rede a aplicação irá funcionar.
 const port = 3000

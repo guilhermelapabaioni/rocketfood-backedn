@@ -17,7 +17,7 @@ class DiskStorage {
 
     try {
       await fs.promises.stat(filePath)
-    } catch (e) {
+    } catch {
       return
     }
 

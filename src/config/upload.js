@@ -14,7 +14,10 @@ const MULTER = {
 
       return callback(null, fileName)
     }
-  })
+  }),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // limitar o tamanho do arquivo para 10 MB
+  }
 }
 
 module.exports = {

@@ -1,6 +1,6 @@
 const sqliteConnection = require('../database/sqlite')
 const AppError = require('../utils/AppError')
-// const { hash, compare } = require('bcryptjs')
+const { hash, compare } = require('bcryptjs')
 
 class UsersController {
   async create(req, res) {
@@ -18,14 +18,22 @@ class UsersController {
       throw new AppError('E-mail já cadastrado!')
     }
 
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
+
+    if (!passwordRegex.test(password)) {
+      throw new AppError('Your password must be at least 8 characters, one number and one special character!')
+    }
+
     if (password != confirmPassword) {
       throw new AppError('As senhas não coincidem!')
     }
 
+    const hashedPassword = await hash(password, 8)
+
     if (role) {
-      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, password, role])
+      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, role])
     } else {
-      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, password, 'user'])
+      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, 'user'])
     }
 
     return res.json(`User created successfully`)
@@ -55,10 +63,11 @@ class UsersController {
     }
 
     if (oldPassword && newPassword) {
-      if (oldPassword !== user.password) {
+      const checkOldPassword = await compare(oldPassword, user.password)
+      if (!checkOldPassword) {
         throw new AppError('Your old password is incorrect!')
       }
-      user.password = newPassword
+      user.password = await hash(newPassword, 8)
     }
 
     await database.run(`UPDATE users SET name = ?, email = ?, password = ?, updated_at = DATETIME('now') WHERE id = ?`, [user.name, user.email, user.password, id])
@@ -70,13 +79,13 @@ class UsersController {
 
   async index(req, res) { }
 
-  async get(req, res) { 
-    const {email, password} = req.body
+  async get(req, res) {
+    const { email, password } = req.body
 
     const database = await sqliteConnection()
     const user = await database.get('SELECT * FROM users WHERE email = (?)', [email])
 
-    if(password != user.password) {
+    if (password != user.password) {
       throw new AppError('Something is wrong.')
     }
 

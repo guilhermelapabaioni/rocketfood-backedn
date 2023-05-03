@@ -1,14 +1,21 @@
 const AppError = require('../utils/AppError')
 const knex = require('../database/knex');
+const DiskStorage = require('../providers/DiskStorage')
 
 class FoodsController {
   async create(req, res) {
     const { user_id } = req.params
-    const { avatar, name, category, price, description, ingredients } = req.body;
+    const imageFileName = req.file.filename
+    const parsedData = JSON.parse(req.body.data)
+
+    const { name, category, price, description, ingredients } = parsedData;
+
+    const diskStorage = new DiskStorage()
+    const image = await diskStorage.saveFile(imageFileName)
 
     const food_id = await knex('foods').insert({
       user_id,
-      avatar,
+      image,
       name,
       category,
       price,
@@ -28,19 +35,37 @@ class FoodsController {
       }
     }
 
-    res.json(`Food created successfully`)
+    res.json({ food_id: food_id })
   }
 
   async update(req, res) {
     const { id } = req.params
-    const { avatar, name, category, price, description, oldIngredients, ingredients } = req.body
+    const parsedData = JSON.parse(req.body.data)
+    const { name, category, price, description, oldIngredients, ingredients } = parsedData
+    const imageFoodFile = req.file.filename
 
-    await knex('foods').where({ id }).update({
-      name,
-      category,
-      price,
-      description
-    })
+    const food = await knex('foods').where({ id }).first()
+
+    if (!food) {
+      throw new AppError('Inválido')
+    }
+
+    const diskStorage = new DiskStorage()
+    if (req.file) {
+      if (food.imageFoodFile) {
+        await diskStorage.deleteFile(food.imageFoodFile)
+      }
+      const image = await diskStorage.saveFile(imageFoodFile)
+
+      await knex('foods').where({ id }).update({
+        image,
+        name,
+        category,
+        price,
+        description
+      })
+    }
+
 
     const existingIngredients = await knex('ingredients').where({ food_id: id }).select('*')
 
@@ -80,22 +105,8 @@ class FoodsController {
     res.json(`Update was successful`)
   }
 
-  async delete(req, res) {
-    const { id } = req.params
-
-    const food = await knex('foods').where({ id }).first()
-
-    const ingredients = await knex('ingredients').where({ food_id: id }).select('*')
-
-    await knex('foods').where({ id }).delete()
-    await knex('ingredients').where({ food_id: id }).delete()
-
-    res.json({ food, ingredients })
-  }
 
   async index(req, res) {
-    // const { user_id } = req.params
-
     const foods = await knex('foods')
     res.json(foods)
   }
@@ -109,6 +120,18 @@ class FoodsController {
     return res.json({ ...food, ingredient })
   }
 
+  async delete(req, res) {
+    const { id } = req.params
+
+    const food = await knex('foods').where({ id }).first()
+
+    const ingredients = await knex('ingredients').where({ food_id: id }).select('*')
+
+    await knex('foods').where({ id }).delete()
+    await knex('ingredients').where({ food_id: id }).delete()
+
+    res.json({ food, ingredients })
+  }
 }
 
 module.exports = FoodsController
