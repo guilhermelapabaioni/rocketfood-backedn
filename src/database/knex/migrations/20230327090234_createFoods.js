@@ -3,7 +3,7 @@ exports.up = knex =>
   knex.schema.createTable('foods', table => {
     table.increments('id');
     table.integer('user_id').references('id').inTable('users')
-    table.text('avatar').nullable();
+    table.text('image').nullable();
     table.text('name');
     table.text('category')
     table.double('price')
