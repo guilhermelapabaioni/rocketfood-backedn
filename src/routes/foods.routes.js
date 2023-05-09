@@ -7,7 +7,7 @@ const upload = multer(uploadConfig.MULTER)
 
 const ensureAuth = require('../middleware/ensureAuth')
 const foodsRoutes = Router()
-foodsRoutes.use(ensureAuth)
+// foodsRoutes.use(ensureAuth)
 
 const foodsController = new FoodsController()
 

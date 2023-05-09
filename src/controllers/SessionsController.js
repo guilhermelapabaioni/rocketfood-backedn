@@ -9,15 +9,19 @@ class SessionsController {
   async create(req, res, next) {
     const { email, password } = req.body
 
+    if(!email || !password) {
+      throw new AppError('Inform your email and password.')
+    }
+
     const user = await knex('users').where({ email }).first()
 
     if (!user) {
-      throw new AppError('E-mail or password incorrect.', 401)
+      throw new AppError('E-mail or password incorrect.')
     }
 
     const passwordMatch = await compare(password, user.password)
 
-    if (passwordMatch) {
+    if (!passwordMatch) {
       throw new AppError('E-mail or password incorrect')
     }
 

@@ -1,42 +1,15 @@
-const sqliteConnection = require('../database/sqlite')
-const AppError = require('../utils/AppError')
-const { hash, compare } = require('bcryptjs')
+const UserRepository = require('../repositories/UserRepository')
+const UserServices = require('../services/UserServices')
 
 class UsersController {
-  async create(req, res) {
-    const { name, email, password, confirmPassword, role } = req.body
+  async create(request, response) {
+    const { name, email, password, confirmPassword, role } = request.body
 
-    const database = await sqliteConnection()
+    const userRepository = new UserRepository()
+    const userCreateService = new UserServices(userRepository)
+    await userCreateService.createUser({ name, email, password, confirmPassword, role })
 
-    const checkUserByEmail = await database.get('SELECT email FROM users WHERE email = (?)', [email])
-
-    if (name === '' || email === '' || password === '' || confirmPassword === '') {
-      throw new AppError('Todos os campos precisam ser preenchidos!')
-    }
-
-    if (checkUserByEmail) {
-      throw new AppError('E-mail já cadastrado!')
-    }
-
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/
-
-    if (!passwordRegex.test(password)) {
-      throw new AppError('Your password must be at least 8 characters, one number and one special character!')
-    }
-
-    if (password != confirmPassword) {
-      throw new AppError('As senhas não coincidem!')
-    }
-
-    const hashedPassword = await hash(password, 8)
-
-    if (role) {
-      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, role])
-    } else {
-      await database.run('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)', [name, email, hashedPassword, 'user'])
-    }
-
-    return res.json(`User created successfully`)
+    return response.status(201).json()
   }
 
   async update(req, res) {
@@ -79,18 +52,7 @@ class UsersController {
 
   async index(req, res) { }
 
-  async get(req, res) {
-    const { email, password } = req.body
-
-    const database = await sqliteConnection()
-    const user = await database.get('SELECT * FROM users WHERE email = (?)', [email])
-
-    if (password != user.password) {
-      throw new AppError('Something is wrong.')
-    }
-
-    return res.json(user)
-  }
+  async get(req, res) { }
 }
 
 module.exports = UsersController;
