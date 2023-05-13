@@ -4,9 +4,10 @@ const IngredientServices = require('./IngredientServices')
 const IngredientRepository = require('../repositories/IngredientRepository')
 
 class FoodServices {
-  constructor(foodRepository, ingredientRepository) {
+  constructor(foodRepository) {
     this.foodRepository = foodRepository;
-    this.ingredientRepository = ingredientRepository;
+    const ingredientRepository = new IngredientRepository
+    this.ingredientServices = new IngredientServices(ingredientRepository)
   }
 
   async createFood({ user_id, image, name, category, price, description, ingredients }) {
@@ -19,10 +20,7 @@ class FoodServices {
 
     const food_id = await this.foodRepository.createFood({ user_id, image: imageUpload, name, category, price, description })
 
-    const ingredientRepository = new IngredientRepository()
-    const ingredientServices = new IngredientServices(ingredientRepository)
-
-    await ingredientServices.createIngredient({ food_id: food_id.lastID, ingredients })
+    this.ingredientServices.createIngredient({ food_id: food_id.lastID, ingredients })
 
     return food_id
   }
@@ -52,6 +50,18 @@ class FoodServices {
 
       await ingredientServices.updateIngredient({ food_id: id, oldIngredients, ingredients })
     }
+  }
+
+  async deleteFood({ id }) {
+    const food = await this.foodRepository.findById(id)
+
+    if (!food) {
+      throw new AppError('Something is wrong, try again later.')
+    }
+
+    await this.foodRepository.deleteFood({ id: food.id })
+
+    return food
   }
 }
 

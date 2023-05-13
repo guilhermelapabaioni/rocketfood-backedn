@@ -6,8 +6,14 @@ const sqliteConnection = require('../database/sqlite/index')
 // const database = knex()
 
 class FoodRepository {
-  async findById(food_id) {
-    const food = await knex('foods').where({ id: food_id }).first()
+  async indexFoods() {
+    const foods = await knex('foods')
+
+    return foods
+  }
+
+  async findById(id) {
+    const food = await knex('foods').where({ id }).first()
 
     return food
   }
@@ -29,9 +35,11 @@ class FoodRepository {
     await knex('foods').where({ id }).update({
       image, name, category, price, description
     })
-
   }
 
+  async deleteFood({ id }) {
+    await knex('foods').where({ id }).delete()
+  }
 }
 
 module.exports = FoodRepository

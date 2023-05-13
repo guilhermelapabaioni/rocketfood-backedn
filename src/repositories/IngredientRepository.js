@@ -3,7 +3,7 @@ const knex = require('../database/knex');
 class IngredientRepository {
 
   async findById(food_id) {
-    const ingredients = await knex('ingredients').where({ food_id: food_id }).select('*')
+    const ingredients = await knex('ingredients').where({ food_id: food_id }).select('*').orderBy('ingredient')
 
     return ingredients
   }
@@ -18,7 +18,6 @@ class IngredientRepository {
   async deleteIngredient(ingredientsDelete) {
     const ingredientsDeleteds = await knex('ingredients').whereIn('id', ingredientsDelete).del()
 
-    console.log(ingredientsDeleteds);
     return ingredientsDeleteds
   }
 }

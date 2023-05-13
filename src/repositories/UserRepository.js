@@ -6,7 +6,7 @@ class UserRepository {
     // Fazendo a conexão com o banco de dados sqlite.
     const database = await sqliteConnection()
     // Buscando o usuário cujo o e-mail foi informado.
-    const user = await database.get('SELECT email FROM users WHERE email = (?)', [email])
+    const user = await database.get('SELECT * FROM users WHERE email = (?)', [email])
     // Retornando o usuário cujo o e-mail foi informado.
     return user
   }
