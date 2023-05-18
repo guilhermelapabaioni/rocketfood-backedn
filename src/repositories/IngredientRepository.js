@@ -1,6 +1,13 @@
 const knex = require('../database/knex');
 
 class IngredientRepository {
+  async maxId(food_id) {
+    console.log(food_id);
+    const maxId = await knex('ingredients').where('food_id', { ...food_id }).max('id as maxId')
+
+    return maxId
+  }
+
 
   async findById(food_id) {
     const ingredients = await knex('ingredients').where({ food_id: food_id }).select('*').orderBy('ingredient')

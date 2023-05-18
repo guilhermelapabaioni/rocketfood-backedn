@@ -3,6 +3,15 @@ class IngredientServices {
     this.ingredientRepository = ingredientRepository;
   }
 
+  async getIngredientMaxId({ food_id }) {
+    console.log(food_id);
+    const maxId = this.ingredientRepository.maxId(food_id);
+
+    const nextId = maxId[0].maxId ? maxId[0].maxId + 1 : 1
+
+    return nextId
+  }
+
   async createIngredient({ food_id, ingredients }) {
     if (ingredients) {
       const ingredientsInsert = ingredients.map(ingredient => {

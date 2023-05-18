@@ -2,7 +2,6 @@ const FoodRepository = require('../repositories/FoodRepository')
 const FoodServices = require('../services/FoodServices')
 const IngredientRepository = require('../repositories/IngredientRepository')
 
-const knex = require('../database/knex')
 const foodRepository = new FoodRepository()
 const foodServices = new FoodServices(foodRepository)
 
