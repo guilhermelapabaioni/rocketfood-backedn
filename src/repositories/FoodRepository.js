@@ -7,7 +7,21 @@ const sqliteConnection = require('../database/sqlite/index')
 
 class FoodRepository {
   async indexFoods() {
-    const foods = await knex('foods')
+    const foods = await knex('foods').orderBy('foods.id');
+
+    return foods
+  }
+
+  async indexFoodsWithIngredients({ search }) {
+    console.log(search);
+    const ingredients = search.split(',').map(ingredient => ingredient.trim());
+    const lowercaseSearch = search.toLowerCase()
+    const foods = await knex('ingredients')
+      .innerJoin('foods', 'foods.id', 'ingredients.food_id')
+      .whereRaw('LOWER(foods.name) LIKE ?', `%${lowercaseSearch}%`)
+      .orWhereIn(knex.raw('LOWER(ingredients.ingredient)'), ingredients.map(ingredient => ingredient.toLowerCase()))
+      .groupBy('foods.id')
+      .orderBy('foods.name');
 
     return foods
   }

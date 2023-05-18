@@ -10,6 +10,18 @@ class FoodServices {
     this.ingredientServices = new IngredientServices(ingredientRepository)
   }
 
+  async index({ search }) {
+    let foods
+
+    if (search) {
+      foods = await this.foodRepository.indexFoodsWithIngredients({ search })
+    } else {
+      foods = await this.foodRepository.indexFoods({ search })
+    }
+
+    return foods
+  }
+
   async createFood({ user_id, image, name, category, price, description, ingredients }) {
     if (!name || !price || !description || !image) {
       throw new AppError('You need to provide a avatar, name, price and description to create a new food.')

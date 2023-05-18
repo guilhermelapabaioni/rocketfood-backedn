@@ -32,8 +32,11 @@ class FoodsController {
 
 
   async index(request, response) {
-    const foods = await foodRepository.indexFoods()
-    response.json(foods)
+    const search = request.query.search;
+
+    const foods = await foodServices.index({ search });
+
+    return response.status(200).json(foods)
   }
 
   async get(request, response) {
