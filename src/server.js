@@ -1,4 +1,6 @@
 require('express-async-errors')
+require('dotenv/config')
+
 const AppError = require('./utils/AppError')
 const uploadConfig = require('./config/upload')
 const path = require('path');
@@ -28,8 +30,6 @@ app.use((error, req, res, next) => {
     })
   }
 
-  console.log(error)
-
   return res.status(500).json({
     status: 'Error',
     message: 'Internal Server Error'
@@ -39,12 +39,11 @@ app.use((error, req, res, next) => {
 app.get('/tmp/uploads/:filename', (req, res) => {
   const filename = req.params.filename;
   const imagePath = path.join(__dirname, '../tmp/uploads', filename);
-  console.log(imagePath);
   res.sendFile(imagePath);
 });
 
 // Informando em qual porta de rede a aplicação irá funcionar.
-const port = 3000
+const port = process.env.PORT
 app.listen(port, () => {
   console.log(`ReactFood running in port ${port}`);
 })

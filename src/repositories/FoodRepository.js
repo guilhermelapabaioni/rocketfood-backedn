@@ -1,9 +1,7 @@
-const sqlConnection = require('../database/sqlite/index')
 const knex = require('../database/knex')
 const AppError = require('../utils/AppError')
 const sqliteConnection = require('../database/sqlite/index')
 
-// const database = knex()
 
 class FoodRepository {
   async indexFoods() {
@@ -13,9 +11,9 @@ class FoodRepository {
   }
 
   async indexFoodsWithIngredients({ search }) {
-    console.log(search);
     const ingredients = search.split(',').map(ingredient => ingredient.trim());
     const lowercaseSearch = search.toLowerCase()
+    
     const foods = await knex('ingredients')
       .innerJoin('foods', 'foods.id', 'ingredients.food_id')
       .whereRaw('LOWER(foods.name) LIKE ?', `%${lowercaseSearch}%`)

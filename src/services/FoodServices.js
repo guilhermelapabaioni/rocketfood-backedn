@@ -38,29 +38,41 @@ class FoodServices {
   }
 
   async updateFood({ id, image, name, category, price, description, oldIngredients, ingredients }) {
-    const food = await this.foodRepository.findById(id)
+    try {
 
-    if (!food) {
-      throw new AppError('Something is wrong, try again later.')
-    }
+      const food = await this.foodRepository.findById(id)
 
-    if (image) {
-      const diskStorage = new DiskStorage()
-      if (food.image) {
-        await diskStorage.deleteFile(food.image)
+      if (!food) {
+        throw new AppError('Something is wrong, try again later.')
       }
-      const imageUpload = await diskStorage.saveFile(image)
 
-      await this.foodRepository.updateFood({ id, image: imageUpload, name, category, price, description })
-    } else {
-      await this.foodRepository.updateFood({ name, category, price, description })
+      if (image) {
+        const diskStorage = new DiskStorage()
+        if (food.image) {
+          await diskStorage.deleteFile(food.image)
+        }
+        const imageUpload = await diskStorage.saveFile(image)
+
+        await this.foodRepository.updateFood({ id, image: imageUpload, name, category, price, description })
+      } else {
+        await this.foodRepository.updateFood({ id, name, category, price, description })
+      }
+
+
+      if (ingredients.length || oldIngredients.length) {
+        const ingredientRepository = new IngredientRepository()
+        const ingredientServices = new IngredientServices(ingredientRepository)
+
+        await ingredientServices.updateIngredient({ food_id: id, oldIngredients, ingredients })
+      }
+
+      if (ingredients.length == 0 && oldIngredients.length == 0) {
+        const ingredientRepository = new IngredientRepository()
+        await ingredientRepository.deleteIngredient()
+      }
     }
-
-    if (ingredients) {
-      const ingredientRepository = new IngredientRepository()
-      const ingredientServices = new IngredientServices(ingredientRepository)
-
-      await ingredientServices.updateIngredient({ food_id: id, oldIngredients, ingredients })
+    catch (error) {
+      console.log(error);
     }
   }
 

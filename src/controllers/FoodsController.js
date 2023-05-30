@@ -23,7 +23,10 @@ class FoodsController {
     const parsedData = JSON.parse(request.body.data)
     const { name, category, price, description, oldIngredients, ingredients } = parsedData
 
-    const image = request.file.filename
+    let image
+    if (request.file) {
+      image = request.file.filename
+    }
 
     await foodServices.updateFood({ id, image, name, category, price, description, oldIngredients, ingredients })
 

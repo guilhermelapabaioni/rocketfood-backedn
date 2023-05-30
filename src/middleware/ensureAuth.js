@@ -9,7 +9,7 @@ function ensureAuth(req, res, next) {
     throw new AppError('JWT Token not informed', 401)
   }
 
-  const [, token] = authHeader.split(' ')
+  const [bearer, token] = authHeader.split(' ')
 
   try {
     const { sub: user_id } = verify(token, authConfig.jwt.secret)

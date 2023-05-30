@@ -1,9 +1,8 @@
 const knex = require('../database/knex');
 
 class IngredientRepository {
-  async maxId(food_id) {
-    console.log(food_id);
-    const maxId = await knex('ingredients').where('food_id', { ...food_id }).max('id as maxId')
+  async maxId(id) {
+    const maxId = await knex('ingredients').where({ food_id: id }).max('id as maxId')
 
     return maxId
   }
@@ -16,16 +15,22 @@ class IngredientRepository {
   }
 
   async createIngredient(ingredientsInsert) {
-    console.log(ingredientsInsert + 'B');
     const ingriedient = await knex('ingredients').insert(ingredientsInsert)
 
     return ingriedient
   }
 
   async deleteIngredient(ingredientsDelete) {
-    const ingredientsDeleteds = await knex('ingredients').whereIn('id', ingredientsDelete).del()
+    if (ingredientsDelete) {
+      const ingredientsDeleteds = await knex('ingredients').whereIn('id', ingredientsDelete).del()
 
-    return ingredientsDeleteds
+      return ingredientsDeleteds
+    } else {
+      const ingredientsDeleteds = await knex('ingredients').delete()
+
+      return ingredientsDeleteds
+    }
+
   }
 }
 
